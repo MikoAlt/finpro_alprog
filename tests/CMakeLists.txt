@@ -16,6 +16,7 @@ FetchContent_MakeAvailable(googletest)
 add_executable(run_tests
     test_anomaly_detector.cpp
     test_data_storage.cpp
+    test_data_manager.cpp
     # Add other test files here
 )
 
@@ -49,6 +50,7 @@ target_include_directories(run_tests
 target_link_libraries(run_tests PRIVATE
     finpro_data_processing
     finpro_storage
+    finpro_query_sync
     nlohmann_json::nlohmann_json # Added nlohmann_json target
 )
 

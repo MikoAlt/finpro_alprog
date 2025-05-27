@@ -18,10 +18,19 @@ target_include_directories(finpro_storage PUBLIC include)
 # Link storage module against nlohmann_json if it uses it directly (it does for tests, but not in lib itself)
 # If DataStorage.cpp itself needed nlohmann::json, you would link it here.
 
+# Query & Synchronization Module
+add_library(finpro_query_sync src/query_sync/DataManager.cpp)
+target_include_directories(finpro_query_sync PUBLIC include)
+# Since DataManager.cpp includes AnomalyDetector.hpp and SensorData.hpp from the global 'include' dir,
+# and AnomalyDetector itself is a class, finpro_query_sync might conceptually depend on
+# finpro_data_processing if it were to use an object of it.
+# Here, it creates its own AnomalyDetector instance, so it primarily needs the headers.
+# Make sure finpro_data_processing's headers are accessible. The global include_directories(include) should cover this.
+
 # --- Main Executable ---
 add_executable(finpro src/main.cpp)
 # Link main executable against the module libraries
-target_link_libraries(finpro PRIVATE finpro_data_processing finpro_storage)
+target_link_libraries(finpro PRIVATE finpro_data_processing finpro_storage, finpro_query_sync)
 
 
 # --- Google Test Setup ---
