@@ -81,7 +81,7 @@ int main(int argc, char* argv[]) {
 
     // std::this_thread::sleep_for(std::chrono::milliseconds(20));    // Optional pause
 
-    dataManager.addSensorData({now_ms(), 35.0, 55.0, 50.0});          // Anomalous data (high temperature, low light intensity)
+    dataManager.addSensorData({now_ms(), 35.0, 55.0, 50.0});          // Anomalous data (high temperature and low light intensity)
 
     // std::this_thread::sleep_for(std::chrono::milliseconds(20));    // Optional pause
 

@@ -16,11 +16,7 @@ include_directories(include)
 # This needs to be available before tests subdirectory is added if tests use it,
 # and before any other library that might use it.
 include(FetchContent)
-FetchContent_Declare(
-        json # Name for FetchContent to use for this dependency
-        URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz
-        # Consider adding DOWNLOAD_EXTRACT_TIMESTAMP TRUE if not using CMP0135 policy above
-)
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz)
 FetchContent_MakeAvailable(json) # This makes the nlohmann_json::nlohmann_json target available
 
 # --- Libraries for modules ---
@@ -59,10 +55,3 @@ enable_testing()
 # Now, when tests/CMakeLists.txt is processed, nlohmann_json::nlohmann_json will exist.
 add_subdirectory(tests)
 
-# Make nlohmann_json available to your targets if they need it
-# (This note is now less relevant here as FetchContent is handled above)
-# For example, if DataStorage.cpp directly used nlohmann::json:
-# target_link_libraries(finpro_storage PUBLIC nlohmann_json::nlohmann_json)
-# And for tests (already handled in tests/CMakeLists.txt if linked there)
-
-# (Option 2 for nlohmann-json can be removed if FetchContent is used)

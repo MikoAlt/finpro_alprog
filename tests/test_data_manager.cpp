@@ -26,6 +26,7 @@ protected:
         defaultThresholds.maxLight = 1000.0;
     }
 
+
     // SetUp is called before each TEST_F case
     void SetUp() override {
         dm = std::make_unique<DataManager>(defaultThresholds);

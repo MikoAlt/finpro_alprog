@@ -75,4 +75,5 @@ std::vector<QueryResult> DataManager::queryData(const QueryParams& params) {
         });
 
     return processedResults;
+    
 }

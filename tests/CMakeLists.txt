@@ -54,7 +54,6 @@ target_link_libraries(run_tests PRIVATE
     nlohmann_json::nlohmann_json # Added nlohmann_json target
 )
 
-
 # Enable testing with CTest
 include(GoogleTest)
 gtest_discover_tests(run_tests)
