@@ -188,7 +188,7 @@ TEST_F(ClientTest, ReadSensorDataReturnsValidStructure) {
     ASSERT_LE(data.humidity, 70.0);
     ASSERT_GE(data.lightIntensity, 100.0);
     ASSERT_LE(data.lightIntensity, 1000.0);
-    ASSERT_GT(data.timestamp, 0);
+    ASSERT_GT(data.timestamp_ms, 0);
 }
 
 TEST_F(ClientTest, ConnectToServerSuccessfully) {
@@ -218,7 +218,8 @@ TEST_F(ClientTest, SendDataSuccessfullyAfterConnection) {
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
     ASSERT_TRUE(mock_server->connection_accepted);
 
-    SensorData test_data = {25.5, 55.1, 500.0, 1234567890LL};
+    // Perbaiki urutan: {timestamp_ms, temperature, humidity, lightIntensity}
+    SensorData test_data = {1234567890LL, 25.5, 55.1, 500.0};
     std::string expected_data_str = test_data.toString() + "\n";
 
     ASSERT_TRUE(client.sendData(test_data));
@@ -234,7 +235,7 @@ TEST_F(ClientTest, SendDataAttemptsReconnectIfInitiallyDisconnected) {
     startMockServer();
     Client client(test_server_ip, test_server_port);
     ASSERT_TRUE(client.connectToServer(1,100));
-    SensorData data1 = {20.0, 40.0, 200.0, 1000LL};
+    SensorData data1 = {1000LL, 20.0, 40.0, 200.0};
     ASSERT_TRUE(client.sendData(data1));
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
     ASSERT_GT(mock_server->data_bytes_received, 0);
@@ -248,7 +249,7 @@ TEST_F(ClientTest, SendDataAttemptsReconnectIfInitiallyDisconnected) {
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     startMockServer();
 
-    SensorData data2 = {22.0, 45.0, 250.0, 2000LL};
+    SensorData data2 = {2000LL, 22.0, 45.0, 250.0};
     std::string expected_data_str = data2.toString() + "\n";
 
     ASSERT_TRUE(client.sendData(data2));
@@ -263,6 +264,7 @@ TEST_F(ClientTest, SendDataAttemptsReconnectIfInitiallyDisconnected) {
 
 TEST_F(ClientTest, SendDataFailsIfReconnectFails) {
     Client client(test_server_ip, test_server_port);
-    SensorData test_data = {25.5, 55.1, 500.0, 1234567890LL};
+    SensorData test_data = {1234567890LL, 25.5, 55.1, 500.0};
     ASSERT_FALSE(client.sendData(test_data));
 }
+

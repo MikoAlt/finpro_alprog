@@ -37,7 +37,12 @@ add_library(finpro_query_sync src/query_sync/DataManager.cpp)
 target_include_directories(finpro_query_sync PUBLIC include)
 target_link_libraries(finpro_query_sync PRIVATE finpro_data_processing)
 
+# --- Core Library for Client & Server ---
+add_library(finpro_core src/Client.cpp src/Server.cpp)
+target_include_directories(finpro_core PUBLIC include)
+
 # --- Main Executable ---
+
 add_executable(finpro src/main.cpp)
 # Link main executable against the module libraries
 target_link_libraries(finpro PRIVATE
@@ -46,6 +51,9 @@ target_link_libraries(finpro PRIVATE
         finpro_query_sync
 )
 
+if (WIN32)
+    target_link_libraries(finpro PRIVATE Ws2_32)
+endif()
 
 # --- Google Test Setup ---
 # Enable testing

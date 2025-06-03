@@ -6,6 +6,7 @@
 #include <thread>
 #include <sstream>
 #include <iomanip>
+#include <random>
 
 #ifdef _WIN32
     #include <winsock2.h>
@@ -23,18 +24,8 @@
     inline int closesocket(SOCKET s) { return close(s); }
 #endif
 
-std::string SensorData::toString() const {
-    std::ostringstream oss;
-    oss << std::fixed << std::setprecision(2)
-        << "temp:" << temperature
-        << ",hum:" << humidity
-        << ",light:" << lightIntensity
-        << ",ts:" << timestamp;
-    return oss.str();
-}
-
 SensorData SensorData::fromString(const std::string& dataStr) {
-    SensorData data = {0.0, 0.0, 0.0, 0};
+    SensorData data = {0, 0.0, 0.0, 0.0};
     std::cout << "Parsing (not fully implemented): " << dataStr << std::endl;
     return data;
 }
@@ -76,7 +67,7 @@ SensorData Client::readSensorData() {
     data.temperature = temp_dist_(rng_);
     data.humidity = hum_dist_(rng_);
     data.lightIntensity = light_dist_(rng_);
-    data.timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(
+    data.timestamp_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
                          std::chrono::system_clock::now().time_since_epoch())
                          .count();
     return data;
@@ -246,3 +237,4 @@ void Client::run() {
         std::this_thread::sleep_for(std::chrono::seconds(SEND_INTERVAL_SECONDS));
     }
 }
+

@@ -16,20 +16,32 @@ FetchContent_MakeAvailable(googletest)
 add_executable(run_tests
     test_anomaly_detector.cpp
     test_data_storage.cpp
+    test_server.cpp
+    test_client.cpp
     test_data_manager.cpp
     # Add other test files here
 )
 
 # Link GTest libraries
+# Use GTest::gtest_main for automatic main()
 target_link_libraries(run_tests
     PRIVATE
-    GTest::gtest
     GTest::gtest_main
+    finpro_core
+    finpro_data_processing
+    finpro_storage
+    nlohmann_json::nlohmann_json
 )
 
+if (WIN32)
+    target_link_libraries(run_tests PRIVATE Ws2_32)
+endif()
+
 # Include directories for your project headers and GTest headers
+# (GTest include is handled by target_link_libraries)
 target_include_directories(run_tests
     PRIVATE
+
     ${CMAKE_CURRENT_SOURCE_DIR}/../include # Path to your project's include directory
     ${googletest_SOURCE_DIR}/googletest/include # GTest headers
 )

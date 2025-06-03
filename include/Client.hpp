@@ -3,6 +3,7 @@
 
 #include <string>
 #include "SensorData.hpp"
+#include <random>
 
 class Client {
 public:
@@ -18,8 +19,15 @@ private:
     int server_port_;
     int sock_;
     bool connected_;
+    std::mt19937 rng_;
+    std::uniform_real_distribution<double> temp_dist_;
+    std::uniform_real_distribution<double> hum_dist_;
+    std::uniform_real_distribution<double> light_dist_;
     void initializeSocketLib();
     void cleanupSocketLib();
+    std::string receiveResponse();
+    void run();
 };
 
 #endif // CLIENT_HPP
+
