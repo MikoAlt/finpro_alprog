@@ -3,8 +3,14 @@
 //
 
 #include "main.hpp"
+#include "Server.hpp"
 
 int main() {
-    // Your main program logic here
+    Server server(8080); // Port 8080, can be changed as needed
+    server.start();
+    // Keep the server running
+    while (true) {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
     return 0;
 }

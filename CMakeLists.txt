@@ -18,11 +18,21 @@ target_include_directories(finpro_storage PUBLIC include)
 # Link storage module against nlohmann_json if it uses it directly (it does for tests, but not in lib itself)
 # If DataStorage.cpp itself needed nlohmann::json, you would link it here.
 
-# --- Main Executable ---
-add_executable(finpro src/main.cpp)
-# Link main executable against the module libraries
-target_link_libraries(finpro PRIVATE finpro_data_processing finpro_storage)
+# --- Core Library for Client & Server ---
+add_library(finpro_core src/Client.cpp src/Server.cpp)
+target_include_directories(finpro_core PUBLIC include)
 
+# --- Main Executable ---
+add_executable(finpro
+    src/main.cpp
+)
+# Link main executable against the module libraries and core
+# (no longer directly compiles Client.cpp/Server.cpp here)
+target_link_libraries(finpro PRIVATE finpro_core finpro_data_processing finpro_storage)
+
+if (WIN32)
+    target_link_libraries(finpro PRIVATE Ws2_32)
+endif()
 
 # --- Google Test Setup ---
 # Enable testing

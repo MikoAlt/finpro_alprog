@@ -23,6 +23,8 @@ struct SensorData {
         return std::chrono::system_clock::time_point(std::chrono::milliseconds(ms));
     }
 
+    static SensorData fromString(const std::string& dataStr);
+
     std::string toString() const {
         std::ostringstream oss;
         oss << std::fixed << std::setprecision(2)
