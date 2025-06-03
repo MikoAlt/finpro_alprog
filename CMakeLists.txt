@@ -1,34 +1,55 @@
 cmake_minimum_required(VERSION 3.20) # Increased version for FetchContent best practices
 project(finpro LANGUAGES CXX)
 
+# Set CMP0135 to NEW to use current timestamps for extracted FetchContent
+if(POLICY CMP0135)
+    cmake_policy(SET CMP0135 NEW)
+endif()
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Add include directory
 include_directories(include)
 
+# --- nlohmann-json ---
+# This needs to be available before tests subdirectory is added if tests use it,
+# and before any other library that might use it.
+include(FetchContent)
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz)
+FetchContent_MakeAvailable(json) # This makes the nlohmann_json::nlohmann_json target available
+
 # --- Libraries for modules ---
 # Data Processing Module
 add_library(finpro_data_processing src/data_processing/AnomalyDetector.cpp)
 target_include_directories(finpro_data_processing PUBLIC include)
 
+
 # Storage Module
 add_library(finpro_storage src/storage/DataStorage.cpp)
 target_include_directories(finpro_storage PUBLIC include)
-# Link storage module against nlohmann_json if it uses it directly (it does for tests, but not in lib itself)
-# If DataStorage.cpp itself needed nlohmann::json, you would link it here.
+# If DataStorage.cpp itself needed nlohmann::json, you would link it here:
+# target_link_libraries(finpro_storage PUBLIC nlohmann_json::nlohmann_json)
+
+
+# Query & Synchronization Module
+add_library(finpro_query_sync src/query_sync/DataManager.cpp)
+target_include_directories(finpro_query_sync PUBLIC include)
+target_link_libraries(finpro_query_sync PRIVATE finpro_data_processing)
 
 # --- Core Library for Client & Server ---
 add_library(finpro_core src/Client.cpp src/Server.cpp)
 target_include_directories(finpro_core PUBLIC include)
 
 # --- Main Executable ---
-add_executable(finpro
-    src/main.cpp
+
+add_executable(finpro src/main.cpp)
+# Link main executable against the module libraries
+target_link_libraries(finpro PRIVATE
+        finpro_data_processing
+        finpro_storage
+        finpro_query_sync
 )
-# Link main executable against the module libraries and core
-# (no longer directly compiles Client.cpp/Server.cpp here)
-target_link_libraries(finpro PRIVATE finpro_core finpro_data_processing finpro_storage)
 
 if (WIN32)
     target_link_libraries(finpro PRIVATE Ws2_32)
@@ -39,31 +60,6 @@ endif()
 enable_testing()
 
 # Add the tests subdirectory
+# Now, when tests/CMakeLists.txt is processed, nlohmann_json::nlohmann_json will exist.
 add_subdirectory(tests)
-
-# --- nlohmann-json (for test verification, and potentially later for DataStorage) ---
-# Option 1: FetchContent (Recommended for modern CMake)
-include(FetchContent)
-FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz)
-FetchContent_MakeAvailable(json)
-
-# Make nlohmann_json available to your targets if they need it
-# For example, if DataStorage.cpp directly used nlohmann::json:
-# target_link_libraries(finpro_storage PUBLIC nlohmann_json::nlohmann_json)
-# And for tests (already handled in tests/CMakeLists.txt if linked there)
-
-# Option 2: find_package (If nlohmann-json is installed system-wide or via a package manager)
-# find_package(nlohmann_json 3 REQUIRED)
-# if(nlohmann_json_FOUND)
-#   message(STATUS "Found nlohmann_json: ${nlohmann_json_INCLUDE_DIRS}")
-#   include_directories(${nlohmann_json_INCLUDE_DIRS}) # Older way
-# else()
-#   message(FATAL_ERROR "nlohmann_json not found. Please install it or use FetchContent.")
-# endif()
-
-# Note: The tests/CMakeLists.txt will link nlohmann_json to the test runner.
-# If your main DataStorage library were to use nlohmann_json directly for its implementation
-# (not just for tests), you would link it to the finpro_storage library here:
-# target_link_libraries(finpro_storage PUBLIC nlohmann_json::nlohmann_json)
-# For now, it's only used in tests for verification.
 

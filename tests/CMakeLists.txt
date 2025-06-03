@@ -18,6 +18,8 @@ add_executable(run_tests
     test_data_storage.cpp
     test_server.cpp
     test_client.cpp
+    test_data_manager.cpp
+    # Add other test files here
 )
 
 # Link GTest libraries
@@ -39,9 +41,31 @@ endif()
 # (GTest include is handled by target_link_libraries)
 target_include_directories(run_tests
     PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/../include
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include # Path to your project's include directory
+    ${googletest_SOURCE_DIR}/googletest/include # GTest headers
 )
 
-# Enable test discovery
+# Link against the source files of the modules being tested
+# This assumes your main CMakeLists.txt defines libraries for your modules
+# If not, you might need to add the source files directly or adjust paths.
+# Example: Link against a library defined in the parent CMakeLists.txt
+# target_link_libraries(run_tests PRIVATE YourProjectLibrary)
+
+# If your modules are not built as libraries, you might need to add their source files
+# directly to the test executable, or create object libraries for them.
+# For simplicity, if AnomalyDetector.cpp and DataStorage.cpp are small and self-contained
+# for testing purposes, you could compile them directly into the test runner.
+# However, it's better practice to link against compiled libraries from your main project.
+
+# Assuming your main CMakeLists.txt will create libraries for these modules:
+target_link_libraries(run_tests PRIVATE
+    finpro_data_processing
+    finpro_storage
+    finpro_query_sync
+    nlohmann_json::nlohmann_json # Added nlohmann_json target
+)
+
+# Enable testing with CTest
 include(GoogleTest)
 gtest_discover_tests(run_tests)
