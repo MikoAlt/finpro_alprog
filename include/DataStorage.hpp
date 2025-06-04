@@ -14,6 +14,8 @@ public:
     bool storeData(const SensorData& data);
     // Appends a batch of data points to the binary file
     bool storeDataBatch(const std::vector<SensorData>& dataBatch);
+    // Replaces all data in the binary file with the provided batch
+    bool replaceAllData(const std::vector<SensorData>& dataBatch);
     // Loads all data from the binary file
     std::vector<SensorData> loadAllData();
     // Exports a list of anomalies to a JSON file

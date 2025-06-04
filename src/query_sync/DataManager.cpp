@@ -82,8 +82,8 @@ void DataManager::saveToStorage(DataStorage& storage) {
     std::lock_guard<std::mutex> lock(dataMutex_); // Ensure thread-safe access
     
     if (!historicalData_.empty()) {
-        // Save all data in batch for efficiency
-        storage.storeDataBatch(historicalData_);
+        // Save all data in batch for efficiency, replacing existing file content
+        storage.replaceAllData(historicalData_);
         std::cout << "DataManager: Saved " << historicalData_.size() << " data points to storage." << std::endl;
     }
 }

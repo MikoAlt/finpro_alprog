@@ -35,6 +35,25 @@ bool DataStorage::storeDataBatch(const std::vector<SensorData>& dataBatch) {
     return true;
 }
 
+bool DataStorage::replaceAllData(const std::vector<SensorData>& dataBatch) {
+    // Open file in truncate mode to replace all content
+    std::ofstream outFile(binaryFilePath_, std::ios::binary | std::ios::trunc);
+    if (!outFile) {
+        // std::cerr << "Error opening binary file for writing batch: " << binaryFilePath_ << std::endl;
+        return false;
+    }
+    for (const auto& data : dataBatch) {
+        outFile.write(reinterpret_cast<const char*>(&data), sizeof(SensorData));
+        if (outFile.fail()) { // Check after each write
+            // std::cerr << "Error writing data to binary file: " << binaryFilePath_ << std::endl;
+            outFile.close();
+            return false;
+        }
+    }
+    outFile.close();
+    return true;
+}
+
 std::vector<SensorData> DataStorage::loadAllData() {
     std::vector<SensorData> allData;
     std::ifstream inFile(binaryFilePath_, std::ios::binary);

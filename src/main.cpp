@@ -46,8 +46,8 @@ void printQueryResults(const std::vector<QueryResult>& results) {
 }
 
 void displayHelp() {
-    std::cout << "\nSmart Classroom Monitoring CLI (Part 4 - Query & Sync)\n";
-    std::cout << "-------------------------------------------------------\n";
+    std::cout << "\nSmart Classroom Monitoring CLI\n";
+    std::cout << "--------------------------------\n";
     std::cout << "Available Commands:\n";
     std::cout << "  add <timestamp_ms> <temp> <humidity> <light_intensity>\n";
     std::cout << "    Adds a new sensor reading. Timestamp is milliseconds since epoch.\n";
@@ -155,7 +155,7 @@ int runClientMode(const std::string& serverIp, int serverPort) {
 
 void printUsage(const char* programName) {
     std::cout << "Smart Classroom Monitoring System\n";
-    std::cout << "====================================\n";
+    std::cout << "=================================\n";
     std::cout << "Usage:\n";
     std::cout << "  " << programName << "                    - Interactive CLI mode\n";
     std::cout << "  " << programName << " server <port>      - Run as server\n";
@@ -193,8 +193,8 @@ int main(int argc, char* argv[]) {
         }
     }
       // Default interactive CLI mode
-    std::cout << "Smart Classroom Monitoring CLI (Part 4 - Query & Sync)\n";
-    std::cout << "=========================================================\n";
+    std::cout << "Smart Classroom Monitoring CLI\n";
+    std::cout << "==============================\n";
     
     AnomalyDetector::AnomalyThresholds currentThresholds;
     DataManager dataManager(currentThresholds);

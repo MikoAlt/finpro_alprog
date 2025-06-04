@@ -63,7 +63,7 @@ Client::Client(const std::string& server_ip, int server_port)
     : server_ip_(server_ip), server_port_(server_port), sock_(INVALID_SOCKET), connected_(false) {
     std::random_device rd;
     rng_ = std::mt19937(rd());
-    temp_dist_ = std::uniform_real_distribution<double>(18.0, 30.0);
+    temp_dist_ = std::uniform_real_distribution<double>(18.0, 40.0);
     hum_dist_ = std::uniform_real_distribution<double>(30.0, 70.0);
     light_dist_ = std::uniform_real_distribution<double>(100.0, 1000.0);
 
