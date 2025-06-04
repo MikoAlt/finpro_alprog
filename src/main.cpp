@@ -63,6 +63,8 @@ void displayHelp() {
     std::cout << "        dev_asc, dev_desc (deviation magnitude)\n";
     std::cout << "    Example: query anomalous sort dev_desc\n";
     std::cout << "    Example: query sort ts_asc\n\n";
+    std::cout << "  save   - Manually save all data to storage.\n";
+    std::cout << "  status - Show data count and storage status.\n";
     std::cout << "  help   - Shows this help message.\n";
     std::cout << "  exit   - Exits the CLI application.\n\n";
 }
@@ -74,6 +76,11 @@ int runServerMode(int port) {
     AnomalyDetector::AnomalyThresholds thresholds;
     DataManager dataManager(thresholds);
     DataStorage dataStorage("sensor_data.bin", "anomaly_report.json");
+    
+    // Load existing data from storage into DataManager
+    std::cout << "Loading existing data from storage..." << std::endl;
+    dataManager.loadFromStorage(dataStorage);
+    std::cout << "DataManager now contains " << dataManager.getDataCount() << " data points." << std::endl;
     
     Server server(port, &dataManager, &dataStorage);
     
@@ -93,6 +100,10 @@ int runServerMode(int port) {
     std::cin.get();
     
     server.stop();
+    
+    // Save all data from DataManager to storage before shutdown
+    std::cout << "Saving all data to storage..." << std::endl;
+    dataManager.saveToStorage(dataStorage);
     
     // Export anomalies to JSON
     DataManager::QueryParams params;
@@ -127,7 +138,7 @@ int runClientMode(const std::string& serverIp, int serverPort) {
     std::cout << "Press Ctrl+C to stop the client." << std::endl;
     
     // Run client for a demo period
-    for (int i = 0; i < 10; ++i) {
+    for (int i = 0; i < 20000; ++i) {
         SensorData data = client.readSensorData();
         if (client.sendData(data)) {
             std::cout << "Sent: " << data.toString() << std::endl;
@@ -138,7 +149,7 @@ int runClientMode(const std::string& serverIp, int serverPort) {
     }
     
     client.disconnect();
-    std::cout << "🔌 Client disconnected." << std::endl;
+    std::cout << "Client disconnected." << std::endl;
     return 0;
 }
 
@@ -181,20 +192,30 @@ int main(int argc, char* argv[]) {
             return 1;
         }
     }
-    
-    // Default interactive CLI mode
+      // Default interactive CLI mode
     std::cout << "Smart Classroom Monitoring CLI (Part 4 - Query & Sync)\n";
     std::cout << "=========================================================\n";
     
     AnomalyDetector::AnomalyThresholds currentThresholds;
     DataManager dataManager(currentThresholds);
+    DataStorage dataStorage("sensor_data.bin", "anomaly_report.json");
 
-    auto now_ms = [] { return SensorData::time_point_to_ms(std::chrono::system_clock::now()); };
-    dataManager.addSensorData({now_ms(), 22.0, 45.0, 500.0});         // Normal data
-    dataManager.addSensorData({now_ms(), 12.0, 50.0, 300.0});         // Anomalous data (low temperature)
-    dataManager.addSensorData({now_ms(), 25.0, 80.0, 250.0});         // Anomalous data (high humidity)
-    dataManager.addSensorData({now_ms(), 35.0, 55.0, 50.0});          // Anomalous data (high temperature and low light intensity)
-    dataManager.addSensorData({now_ms(), 26.0, 65.0, 1200.0});        // Anomalous data (high light intensity)
+    // Load existing data from storage
+    std::cout << "Loading existing data from storage..." << std::endl;
+    dataManager.loadFromStorage(dataStorage);
+    
+    // Add some initial demo data if no data exists
+    if (dataManager.getDataCount() == 0) {
+        std::cout << "No existing data found. Adding demo data..." << std::endl;
+        auto now_ms = [] { return SensorData::time_point_to_ms(std::chrono::system_clock::now()); };
+        dataManager.addSensorData({now_ms(), 22.0, 45.0, 500.0});         // Normal data
+        dataManager.addSensorData({now_ms(), 12.0, 50.0, 300.0});         // Anomalous data (low temperature)
+        dataManager.addSensorData({now_ms(), 25.0, 80.0, 250.0});         // Anomalous data (high humidity)
+        dataManager.addSensorData({now_ms(), 35.0, 55.0, 50.0});          // Anomalous data (high temperature and low light intensity)
+        dataManager.addSensorData({now_ms(), 26.0, 65.0, 1200.0});        // Anomalous data (high light intensity)
+    }
+    
+    std::cout << "DataManager now contains " << dataManager.getDataCount() << " data points." << std::endl;
 
     std::string line;
     displayHelp();
@@ -265,18 +286,38 @@ int main(int argc, char* argv[]) {
                     proceed_with_query = false;
                     break;
                 }
-            }
-
-            if (proceed_with_query) { 
+            }            if (proceed_with_query) { 
                 std::vector<QueryResult> results = dataManager.queryData(queryParams);
                 printQueryResults(results);
             }
+
+        } else if (command == "save") {
+            std::cout << "Saving all data to storage..." << std::endl;
+            dataManager.saveToStorage(dataStorage);
+            std::cout << "Data saved successfully." << std::endl;
+
+        } else if (command == "status") {
+            std::cout << "\n--- System Status ---" << std::endl;
+            std::cout << "Data points in memory: " << dataManager.getDataCount() << std::endl;
+            
+            // Check anomaly count
+            DataManager::QueryParams anomalyParams;
+            anomalyParams.filterAnomalousOnly = true;
+            auto anomalies = dataManager.queryData(anomalyParams);
+            std::cout << "Anomalous data points: " << anomalies.size() << std::endl;
+            std::cout << "Normal data points: " << (dataManager.getDataCount() - anomalies.size()) << std::endl;
+            std::cout << "Storage files: sensor_data.bin, anomaly_report.json" << std::endl;
+            std::cout << "-------------------------\n" << std::endl;
 
         } else {
             std::cerr << "Unknown command: '" << command << "'. Type 'help' for a list of commands.\n";
         }
     }
 
+    // Save all data to storage before exiting
+    std::cout << "Saving data to storage..." << std::endl;
+    dataManager.saveToStorage(dataStorage);
+    
     std::cout << "Exiting program.\n";
     return 0;
 }

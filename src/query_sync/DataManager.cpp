@@ -1,4 +1,5 @@
 #include "DataManager.hpp" // Corresponding header
+#include "DataStorage.hpp" // For storage operations
 #include <iostream>        // For potential debug logging
 
 // Constructor
@@ -75,5 +76,39 @@ std::vector<QueryResult> DataManager::queryData(const QueryParams& params) {
         });
 
     return processedResults;
+}
+
+void DataManager::saveToStorage(DataStorage& storage) {
+    std::lock_guard<std::mutex> lock(dataMutex_); // Ensure thread-safe access
     
+    if (!historicalData_.empty()) {
+        // Save all data in batch for efficiency
+        storage.storeDataBatch(historicalData_);
+        std::cout << "DataManager: Saved " << historicalData_.size() << " data points to storage." << std::endl;
+    }
+}
+
+void DataManager::loadFromStorage(DataStorage& storage) {
+    std::lock_guard<std::mutex> lock(dataMutex_); // Ensure thread-safe access
+    
+    // Load all data from storage
+    std::vector<SensorData> loadedData = storage.loadAllData();
+    
+    if (!loadedData.empty()) {
+        // Replace current data with loaded data
+        historicalData_ = std::move(loadedData);
+        std::cout << "DataManager: Loaded " << historicalData_.size() << " data points from storage." << std::endl;
+    } else {
+        std::cout << "DataManager: No data found in storage or storage is empty." << std::endl;
+    }
+}
+
+std::vector<SensorData> DataManager::getAllData() const {
+    std::lock_guard<std::mutex> lock(dataMutex_); // Ensure thread-safe read access
+    return historicalData_; // Return a copy of the data
+}
+
+size_t DataManager::getDataCount() const {
+    std::lock_guard<std::mutex> lock(dataMutex_); // Ensure thread-safe read access
+    return historicalData_.size();
 }

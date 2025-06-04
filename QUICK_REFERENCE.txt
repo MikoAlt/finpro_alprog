@@ -59,8 +59,8 @@ KEY FILES:
 
 ANOMALY THRESHOLDS:
 ======================
-• Temperature: 18.0°C - 26.0°C
+• Temperature: 15.0°C - 30.0°C
 • Humidity: 30.0% - 70.0%
-• Light: 300.0 - 1000.0 lux
+• Light: 100.0 - 1000.0 lux
 
 

@@ -10,6 +10,9 @@
 #include <optional>               // For optional query parameters
 #include <algorithm>              // For std::sort
 
+// Forward declaration to avoid circular dependency
+class DataStorage;
+
 class DataManager {
 public:
     // Constructor takes the anomaly thresholds to internally use an AnomalyDetector
@@ -30,6 +33,18 @@ public:
 
     // Queries the stored sensor data based on the given parameters. Thread-safe.
     std::vector<QueryResult> queryData(const QueryParams& params);
+
+    // Save all data to DataStorage for persistence. Thread-safe.
+    void saveToStorage(DataStorage& storage);
+
+    // Load data from DataStorage to initialize historical data. Thread-safe.
+    void loadFromStorage(DataStorage& storage);
+
+    // Get all historical data for external processing. Thread-safe.
+    std::vector<SensorData> getAllData() const;
+
+    // Get the number of stored data points. Thread-safe.
+    size_t getDataCount() const;
 
 private:
     std::vector<SensorData> historicalData_;
