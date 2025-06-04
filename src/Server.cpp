@@ -1,6 +1,7 @@
 #include "../include/Server.hpp"
 #include <iostream>
 #include <cstring>
+#include <sstream>
 #ifdef _WIN32
 #include <winsock2.h>
 #pragma comment(lib, "ws2_32.lib")
@@ -10,10 +11,17 @@
 #include <unistd.h>
 #endif
 
-Server::Server(int port) : port(port), running(false), server_fd(-1) {}
+Server::Server(int port) : port(port), running(false), server_fd(-1), dataManager_(nullptr), dataStorage_(nullptr) {}
+
+Server::Server(int port, DataManager* dataManager, DataStorage* dataStorage) 
+    : port(port), running(false), server_fd(-1), dataManager_(dataManager), dataStorage_(dataStorage) {}
 
 Server::~Server() {
     stop();
+}
+
+void Server::setDataCallback(std::function<void(const SensorData&)> callback) {
+    dataCallback_ = callback;
 }
 
 void Server::start() {
@@ -76,13 +84,54 @@ void Server::handleClient(int client_socket) {
         int bytes = recv(client_socket, buffer, sizeof(buffer)-1, 0);
         if (bytes <= 0) break;
         buffer[bytes] = '\0';
-        std::cout << "Received: " << buffer << std::endl;
-        // Here you can process the received data
+        
+        std::string receivedData(buffer);
+        std::cout << "Received: " << receivedData << std::endl;
+        
+        // Process the received sensor data
+        processReceivedData(receivedData);
+        
+        // Send acknowledgment back to client
+        const char* ack = "ACK\n";
+        send(client_socket, ack, strlen(ack), 0);
     }
 #ifdef _WIN32
     closesocket(client_socket);
 #else
     close(client_socket);
 #endif
+}
+
+void Server::processReceivedData(const std::string& dataStr) {
+    try {
+        // Parse the received data into SensorData structure
+        SensorData sensorData = SensorData::fromString(dataStr);
+        
+        // If timestamp is 0, it means parsing failed
+        if (sensorData.timestamp_ms == 0) {
+            std::cerr << "Failed to parse sensor data: " << dataStr << std::endl;
+            return;
+        }
+        
+        // Call the registered callback if available
+        if (dataCallback_) {
+            dataCallback_(sensorData);
+        }
+        
+        // Store data using DataManager if available
+        if (dataManager_) {
+            dataManager_->addSensorData(sensorData);
+        }
+        
+        // Store data using DataStorage if available
+        if (dataStorage_) {
+            dataStorage_->storeData(sensorData);
+        }
+        
+        std::cout << "Processed sensor data: " << sensorData.toString() << std::endl;
+        
+    } catch (const std::exception& e) {
+        std::cerr << "Error processing received data: " << e.what() << std::endl;
+    }
 }
 

@@ -49,6 +49,7 @@ target_link_libraries(finpro PRIVATE
         finpro_data_processing
         finpro_storage
         finpro_query_sync
+        finpro_core
 )
 
 if (WIN32)

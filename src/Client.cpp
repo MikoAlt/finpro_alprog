@@ -26,7 +26,36 @@
 
 SensorData SensorData::fromString(const std::string& dataStr) {
     SensorData data = {0, 0.0, 0.0, 0.0};
-    std::cout << "Parsing (not fully implemented): " << dataStr << std::endl;
+    
+    // Parse format: "Timestamp (ms): 1640995200000, Temp: 22.50 C, Humidity: 45.30 %, Light: 500.00 lux"
+    std::istringstream iss(dataStr);
+    std::string token;
+    
+    try {
+        // Parse timestamp
+        while (iss >> token && token != "Timestamp") {}
+        iss >> token; // "(ms):"
+        iss >> data.timestamp_ms;
+        
+        // Parse temperature
+        while (iss >> token && token != "Temp:") {}
+        iss >> data.temperature;
+        iss >> token; // "C,"
+        
+        // Parse humidity
+        while (iss >> token && token != "Humidity:") {}
+        iss >> data.humidity;
+        iss >> token; // "%,"
+        
+        // Parse light intensity
+        while (iss >> token && token != "Light:") {}
+        iss >> data.lightIntensity;
+        
+    } catch (const std::exception& e) {
+        std::cerr << "Error parsing sensor data: " << e.what() << std::endl;
+        data = {0, 0.0, 0.0, 0.0}; // Reset to default values on error
+    }
+    
     return data;
 }
 

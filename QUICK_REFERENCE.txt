@@ -1,0 +1,66 @@
+SMART CLASSROOM MONITORING SYSTEM - QUICK REFERENCE
+================================================================
+
+PROJECT STATUS: ✅ COMPLETE
+TEST RESULTS: 40/40 PASSING (100%)
+BUILD STATUS: ✅ SUCCESSFUL
+
+QUICK START COMMANDS:
+========================
+
+1. BUILD PROJECT:
+   cd build
+   cmake ..
+   cmake --build . --config Release
+
+2. RUN TESTS:
+   .\tests\run_tests.exe
+   Expected: [  PASSED  ] 40 tests.
+
+3. INTERACTIVE MODE:
+   .\finpro.exe
+
+4. SERVER MODE:
+   .\finpro.exe server 8080
+
+5. CLIENT MODE:
+   .\finpro.exe client 127.0.0.1 8080
+
+6. FULL DEMO:
+   .\demo.bat
+
+FEATURES IMPLEMENTED:
+============================
+Real-time sensor data monitoring (Temperature, Humidity, Light)
+Client-server TCP communication with reconnection
+Anomaly detection with configurable thresholds
+Data persistence (binary storage + JSON export)
+Advanced querying and filtering system
+Multi-threaded server handling multiple clients
+Interactive CLI with emoji indicators
+Comprehensive test suite (40 tests)
+Integration tests for end-to-end functionality
+Error handling and graceful degradation
+
+🏗️ ARCHITECTURE COMPONENTS:
+============================
+• Client: Sensor data simulation and network communication
+• Server: Multi-client handling and real-time processing
+• DataManager: Query operations and anomaly detection
+• DataStorage: File I/O and data persistence
+• AnomalyDetector: Multi-parameter anomaly detection
+
+KEY FILES:
+=============
+• Main App: build/finpro.exe
+• Tests: build/tests/run_tests.exe
+• Demo: demo.bat
+• Docs: README.md
+
+ANOMALY THRESHOLDS:
+======================
+• Temperature: 18.0°C - 26.0°C
+• Humidity: 30.0% - 70.0%
+• Light: 300.0 - 1000.0 lux
+
+
