@@ -1,6 +1,6 @@
 # 🏫 Smart Classroom Monitoring System
 
-**Final Project - CS1 (Computer Science 1)**
+**Final Project - CS1 (Case Study 1)**
 
 A comprehensive sensor monitoring system designed for smart classroom environments in electrical engineering education. This system implements real-time data collection, anomaly detection, and data persistence with a client-server architecture.
 
